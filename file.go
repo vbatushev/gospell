@@ -1,7 +1,7 @@
 package gospell
 
 import (
-	"github.com/client9/gospell/plaintext"
+	"github.com/vbatushev/gospell/plaintext"
 
 	"strings"
 )

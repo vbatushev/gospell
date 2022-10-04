@@ -10,8 +10,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/client9/gospell"
-	"github.com/client9/gospell/plaintext"
+	"github.com/vbatushev/gospell"
+	"github.com/vbatushev/gospell/plaintext"
 )
 
 var (

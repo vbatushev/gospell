@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/naoina/toml"
-	glob "github.com/ryanuber/go-glob"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/client9/gospell"
-	"github.com/client9/gospell/plaintext"
+	"github.com/naoina/toml"
+	glob "github.com/ryanuber/go-glob"
+
+	"github.com/vbatushev/gospell"
+	"github.com/vbatushev/gospell/plaintext"
 )
 
 // Dictionary is the configuration structure

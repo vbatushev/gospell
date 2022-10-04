@@ -1,67 +1,40 @@
 # gospell
-[![Build Status](https://travis-ci.org/client9/gospell.svg?branch=master)](https://travis-ci.org/client9/gospell) [![Go Report Card](http://goreportcard.com/badge/client9/gospell)](http://goreportcard.com/report/client9/gospell) [![GoDoc](https://godoc.org/github.com/client9/gospell?status.svg)](https://godoc.org/github.com/client9/gospell) [![Coverage](http://gocover.io/_badge/github.com/client9/gospell)](http://gocover.io/github.com/client9/gospell) [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/client9/gospell/master/LICENSE)
 
-pure golang spelling dictionary based on hunspell dictionaries.
+[![Build Status](https://travis-ci.org/vbatushev/gospell.svg?branch=master)](https://travis-ci.org/vbatushev/gospell) [![Go Report Card](http://goreportcard.com/badge/vbatushev/gospell)](http://goreportcard.com/report/vbatushev/gospell) [![GoDoc](https://godoc.org/github.com/vbatushev/gospell?status.svg)](https://godoc.org/github.com/vbatushev/gospell) [![Coverage](http://gocover.io/_badge/github.com/vbatushev/gospell)](http://gocover.io/github.com/vbatushev/gospell) [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/vbatushev/gospell/master/LICENSE)
 
-NOTE: I'm not an expert in linguistics nor spelling.  Help is very
-welcome!
+Провека правописания с помощью словарей Hunspell на чистом Go
 
-### What is hunspell?
+    ВНИМАНИЕ: Я не эксперт в лингвистике и проверке правописания.
+
+### Что такое словари Hunspell?
 
 * http://hunspell.github.io
 * https://github.com/hunspell
 
-NOTE: This is not affiliated with Hunspell although if they wanted
-merge it in as an official project, I'd be happy to donate the code
-(although it's in no shape to do so right now).
+  NOTE: This is not affiliated with Hunspell although if they wanted merge it in as an official project, I'd be happy to donate the code (although it's in no shape to do so right now).
 
-### Where can I get English dictionaries?
+### Где скачать словари?
 
+Лучше всего скачать словари из LibreOffice, они там уже в UTF8.
 
+#### Русский язык
 
-The world of spelling dictionaries is surprisingly complicated, as
-"lists of words" are frequently proprietary and with conflicting
-software licenses.
+  * [ru_RU.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff)
+  * [ru_RU.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic)
 
+#### Английский язык
 
-### Kevin Atkinson
+  * [en_GB.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_GB.aff)
+  * [en_GB.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_GB.dic)
+  * [en_US.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.aff)
+  * [en_US.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.dic)
 
-[Kevin Atkinson](http://www.kevina.org)
-maintains many open source lists via
-the [SCOWL](http://wordlist.aspell.net) project.  The source code and
-raw lists are available on
-[GitHub `kevina/wordlist`](https://github.com/kevina/wordlist)
+Остальные словари вариантов английского языка [здесь](https://github.com/LibreOffice/dictionaries/tree/master/en)
 
+#### Испанский язык
 
-#### Marco A.G.Pinto
+  * [es.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/es.aff)
+  * [es.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/es.dic)
 
-Marco maintains the released dictionaries for Firefox and Apache Open
-Office.  The word lists appears to be actively updated.
+Остальные словари вариантов испанского языка [здесь](https://github.com/LibreOffice/dictionaries/tree/master/es)
 
-https://github.com/marcoagpinto/aoo-mozilla-en-dict
-
-#### Open Office
-
-http://extensions.openoffice.org/en/project/english-dictionaries-apache-openoffice
-
-The downloaded file has a `.oxt` extension but it's a compressed `tar`
-file.  Extract the files using:
-
-```
-mkdir dict-en
-cd dict-en
-tar -xzf ../dict-en.oxt
-```
-
-#### Chromium
-
-The Chrome/Chromium browser uses Hunspell and it's source tree
-contains various up-to-date dictionaries, some with additional words.  You can view them at
-[chromium.googlesource.com](https://chromium.googlesource.com/chromium/deps/hunspell_dictionaries/+/master)
-and you can check them out locally via
-
-```bash
-git clone --depth=1 https://chromium.googlesource.com/chromium/deps/hunspell_dictionaries
-```
-
-More information can be found in the [chromium developer guide](https://www.chromium.org/developers/how-tos/editing-the-spell-checking-dictionaries)
