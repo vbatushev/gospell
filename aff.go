@@ -39,7 +39,7 @@ func (a Affix) Expand(word string, out []string) []string {
 			if r.Strip != "" && strings.HasSuffix(word, r.Strip) {
 				stripWord = word[:len(word)-len(r.Strip)]
 			}
-			if r.Strip == "0" {
+			if r.AffixText == "0" {
 				out = append(out, stripWord)
 			} else {
 				out = append(out, stripWord+r.AffixText)
