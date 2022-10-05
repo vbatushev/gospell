@@ -22,6 +22,8 @@ var camelCaseRegexp1 = regexp.MustCompile("[A-Z]+")
 
 var shaHashRegexp = regexp.MustCompile("^[0-9a-z]{40}$")
 
+var latinNumRegexp = regexp.MustCompile(`^M{0,3}(CM|CD|D?C{0,3})?(XC|XL|L?X{0,3})?(IX|IV|V?I{0,3})?$`)
+
 // Splitter splits a text into words
 // Highly likely this implementation will change so we are encapsulating.
 type Splitter struct {
@@ -53,6 +55,10 @@ func isNumber(s string) bool {
 
 func isNumberBinary(s string) bool {
 	return numberBinaryRegexp.MatchString(s)
+}
+
+func isLatinNumber(s string) bool {
+	return latinNumRegexp.MatchString(s)
 }
 
 // is word in the form of a "number with units", e.g. "101ms", "3ft",
