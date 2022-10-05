@@ -3,7 +3,6 @@ module github.com/vbatushev/gospell
 go 1.19
 
 require (
-	github.com/client9/gospell v0.0.0-20160306015952-90dfc71015df
 	github.com/client9/plaintext v0.0.0-20180109203002-5bf47e7c0c45
 	github.com/naoina/toml v0.1.1
 	github.com/ryanuber/go-glob v1.0.0

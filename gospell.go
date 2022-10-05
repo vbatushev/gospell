@@ -90,7 +90,7 @@ func (s *GoSpell) AddWordList(r io.Reader) ([]string, error) {
 // Spell checks to see if a given word is in the internal dictionaries
 // TODO: add multiple dictionaries
 func (s *GoSpell) Spell(word string) bool {
-	//log.Printf("Checking %s", word)
+	//log.Printf("Checking %s", word )
 	_, ok := s.Dict[word]
 	if ok {
 		return true
