@@ -39,7 +39,11 @@ func (a Affix) Expand(word string, out []string) []string {
 			if r.Strip != "" && strings.HasSuffix(word, r.Strip) {
 				stripWord = word[:len(word)-len(r.Strip)]
 			}
-			out = append(out, stripWord+r.AffixText)
+			if r.Strip == "0" {
+				out = append(out, stripWord)
+			} else {
+				out = append(out, stripWord+r.AffixText)
+			}
 		}
 	}
 	return out
@@ -70,7 +74,8 @@ type DictConfig struct {
 }
 
 // Expand expands a word/affix using dictionary/affix rules
-//  This also supports CompoundRule flags
+//
+//	This also supports CompoundRule flags
 func (a DictConfig) Expand(wordAffix string, out []string) ([]string, error) {
 	out = out[:0]
 	idx := strings.Index(wordAffix, "/")
