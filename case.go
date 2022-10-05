@@ -67,7 +67,7 @@ func CaseStyle(word string) WordCase {
 func CaseVariations(word string, style WordCase) []string {
 	switch style {
 	case Title:
-		return []string{strings.ToTitle(word), strings.ToUpper(word)}
+		return []string{strings.Title(word), strings.ToUpper(word)}
 	// case AllLower:
 	// 	return []string{strings.ToLower(word), strings.ToTitle(word), strings.ToUpper(word)}
 	// return []string{word, strings.ToUpper(word[0:1]) + word[1:], strings.ToUpper(word)}
@@ -76,7 +76,7 @@ func CaseVariations(word string, style WordCase) []string {
 	// case Title:
 	// 	return []string{strings.ToTitle(word)}
 	default:
-		return []string{strings.ToLower(word), strings.ToTitle(word), strings.ToUpper(word)}
+		return []string{strings.ToLower(word), strings.Title(word), strings.ToUpper(word)}
 		// return []string{word, strings.ToUpper(word)}
 	}
 }
