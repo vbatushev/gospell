@@ -7,7 +7,6 @@ import (
 )
 
 // SmokeTest for AFF parser.  Contains a little bit of everything.
-//
 func TestAFFSmoke(t *testing.T) {
 	sample := `
 #
@@ -179,7 +178,7 @@ WORDCHARS 0123456789
 `
 	aff := strings.NewReader(sampleAff)
 	dic := strings.NewReader(sampleDic)
-	gs, err := NewGoSpellReader(aff, dic)
+	gs, err := NewGoSpellReader(aff, dic, nil, false, "")
 	if err != nil {
 		t.Fatalf("Unable to create GoSpell: %s", err)
 	}
@@ -262,7 +261,7 @@ GB
 `
 	aff := strings.NewReader(sampleAff)
 	dic := strings.NewReader(sampleDic)
-	gs, err := NewGoSpellReader(aff, dic)
+	gs, err := NewGoSpellReader(aff, dic, nil, false, "")
 	if err != nil {
 		t.Fatalf("Unable to create GoSpell: %s", err)
 	}
@@ -290,5 +289,23 @@ GB
 		if gs.Spell(tt.word) != tt.spell {
 			t.Errorf("%d %q was not %v", pos, tt.word, tt.spell)
 		}
+	}
+}
+
+func TestWorkWithDB(t *testing.T) {
+	correctWord := "ЧК"
+	wrongWord := "Чк"
+
+	gs, err := NewGoSpellDB("./sample/ru_RU.aff", "./sample/ru_RU.dic", "./sample/dictionary.db", false)
+	if err != nil {
+		t.Fail()
+	}
+
+	if gs.Spell(wrongWord) {
+		t.Fail()
+	}
+
+	if !gs.Spell(correctWord) {
+		t.Fail()
 	}
 }

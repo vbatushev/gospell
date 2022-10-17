@@ -1,6 +1,6 @@
 # gospell
 
-[![Build Status](https://travis-ci.org/vbatushev/gospell.svg?branch=master)](https://travis-ci.org/vbatushev/gospell) [![Go Report Card](http://goreportcard.com/badge/vbatushev/gospell)](http://goreportcard.com/report/vbatushev/gospell) [![GoDoc](https://godoc.org/github.com/vbatushev/gospell?status.svg)](https://godoc.org/github.com/vbatushev/gospell) [![Coverage](http://gocover.io/_badge/github.com/vbatushev/gospell)](http://gocover.io/github.com/vbatushev/gospell) [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/vbatushev/gospell/master/LICENSE)
+[![GoDoc](https://godoc.org/github.com/vbatushev/gospell?status.svg)](https://godoc.org/github.com/vbatushev/gospell) [![license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/vbatushev/gospell/master/LICENSE)
 
 Провека правописания с помощью словарей Hunspell на чистом Go
 
@@ -19,22 +19,21 @@
 
 #### Русский язык
 
-  * [ru_RU.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff)
-  * [ru_RU.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic)
+* [ru_RU.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.aff)
+* [ru_RU.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/ru_RU/ru_RU.dic)
 
 #### Английский язык
 
-  * [en_GB.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_GB.aff)
-  * [en_GB.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_GB.dic)
-  * [en_US.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.aff)
-  * [en_US.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.dic)
+* [en_GB.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_GB.aff)
+* [en_GB.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_GB.dic)
+* [en_US.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.aff)
+* [en_US.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/en/en_US.dic)
 
 Остальные словари вариантов английского языка [здесь](https://github.com/LibreOffice/dictionaries/tree/master/en)
 
 #### Испанский язык
 
-  * [es.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/es.aff)
-  * [es.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/es.dic)
+* [es.aff](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/es.aff)
+* [es.dic](https://raw.githubusercontent.com/LibreOffice/dictionaries/master/es/es.dic)
 
 Остальные словари вариантов испанского языка [здесь](https://github.com/LibreOffice/dictionaries/tree/master/es)
-
