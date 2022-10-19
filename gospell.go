@@ -12,9 +12,11 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/plugin/dbresolver"
 )
 
 // GoSpell is main struct
@@ -333,8 +335,8 @@ func NewGoSpell(affFile, dicFile string) (*GoSpell, error) {
 
 // NewGoSpellDBForce создает из файлов AFF, DIC Hunspell
 // и складывает всё в базу данных, указанную в dbFile
-func NewGoSpellDBForce(affFile, dicFile, dbFile string) (*GoSpell, error) {
-	db := createTable(dbFile, true)
+func NewGoSpellDBForce(affFile, dicFile, dbFile string, config *gorm.Config) (*GoSpell, error) {
+	db := createTable(dbFile, true, config)
 
 	aff, err := os.Open(affFile)
 	if err != nil {
@@ -361,7 +363,7 @@ func fileNameWithoutExtTrimSuffix(fileName string) string {
 	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }
 
-func createTable(dbFile string, force bool) *gorm.DB {
+func createTable(dbFile string, force bool, config *gorm.Config) *gorm.DB {
 	if force {
 		if _, err := os.Stat(dbFile); errors.Is(err, os.ErrNotExist) {
 			if err := os.Remove(dbFile); err != nil {
@@ -373,9 +375,15 @@ func createTable(dbFile string, force bool) *gorm.DB {
 		}
 	}
 
-	db, err := gorm.Open(sqlite.Open(dbFile), &gorm.Config{
-		CreateBatchSize: 1000,
-	})
+	if config == nil {
+		config = &gorm.Config{
+			CreateBatchSize:        1000,
+			SkipDefaultTransaction: true,
+			PrepareStmt:            true,
+		}
+	}
+
+	db, err := gorm.Open(sqlite.Open(dbFile), config)
 	if err != nil {
 		return nil
 	}
@@ -390,12 +398,20 @@ func createTable(dbFile string, force bool) *gorm.DB {
 			return nil
 		}
 	}
+	db.Use(
+		dbresolver.Register(dbresolver.Config{}).
+			SetConnMaxIdleTime(time.Hour).
+			SetConnMaxLifetime(24 * time.Hour).
+			SetMaxIdleConns(100).
+			SetMaxOpenConns(200),
+	)
+
 	return db
 }
 
 // NewGoSpellDB создает GoSpell с использованием указанной в пути базы данных
-func NewGoSpellDB(dbFile string) (*GoSpell, error) {
-	db := createTable(dbFile, false)
+func NewGoSpellDB(dbFile string, config *gorm.Config) (*GoSpell, error) {
+	db := createTable(dbFile, false, config)
 	h, err := NewGoSpellDBReader(db)
 	return h, err
 }

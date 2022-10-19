@@ -36,7 +36,7 @@ func (s *GoSpell) GetSuggestions(word string) []string {
 
 	var founds []WordForm
 	condition := strings.Join(sqlWords, " OR ")
-	result := s.DB.Where(condition).Order("word asc").Find(&founds)
+	result := s.DB.Where(condition).Select("word").Order("word asc").Find(&founds)
 
 	variants := []string{}
 	if result.Error == nil {
@@ -46,6 +46,11 @@ func (s *GoSpell) GetSuggestions(word string) []string {
 	}
 
 	return variants
+}
+
+type onlyWord struct {
+	ID   uint
+	Word string
 }
 
 // Получение подстроки из строки

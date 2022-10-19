@@ -2,9 +2,15 @@ package gospell
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"reflect"
 	"strings"
 	"testing"
+	"time"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 // SmokeTest for AFF parser.  Contains a little bit of everything.
@@ -297,7 +303,7 @@ func TestWorkWithDBForce(t *testing.T) {
 	correctWord := "ЧК"
 	wrongWord := "Чк"
 
-	gs, err := NewGoSpellDBForce("./sample/ru_RU.aff", "./sample/ru_RU.dic", "./sample/dictionary.db")
+	gs, err := NewGoSpellDBForce("./sample/ru_RU.aff", "./sample/ru_RU.dic", "./sample/dictionary.db", nil)
 	if err != nil {
 		t.Fail()
 	}
@@ -313,9 +319,19 @@ func TestWorkWithDBForce(t *testing.T) {
 
 func TestWorkWithDB(t *testing.T) {
 	correctWord := "ракета"
-	wrongWord := "ра-хкета"
+	wrongWord := "рокета"
 
-	gs, err := NewGoSpellDB("./sample/dictionary.db")
+	gs, err := NewGoSpellDB("./sample/dictionary.db", &gorm.Config{
+		CreateBatchSize:        1000,
+		SkipDefaultTransaction: true,
+		PrepareStmt:            true,
+		Logger: logger.New(log.New(os.Stdout, "\n", log.LstdFlags), logger.Config{
+			SlowThreshold:             200 * time.Millisecond,
+			LogLevel:                  logger.Error,
+			IgnoreRecordNotFoundError: true,
+			Colorful:                  true,
+		}),
+	})
 	if err != nil {
 		t.Fail()
 	}

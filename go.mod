@@ -9,6 +9,7 @@ require (
 	golang.org/x/net v0.0.0-20221014081412-f15817d10f9b
 	gorm.io/driver/sqlite v1.4.2
 	gorm.io/gorm v1.24.0
+	gorm.io/plugin/dbresolver v1.3.0
 )
 
 require (
