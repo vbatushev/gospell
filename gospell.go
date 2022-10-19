@@ -2,6 +2,7 @@ package gospell
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -33,6 +34,18 @@ type WordForm struct {
 	Lang string
 	Case WordCase
 }
+
+// Preferences - настройки, хранящиеся в базе данных
+type Preferences struct {
+	ID   uint `gorm:"primaryKey"`
+	Dict string
+}
+
+var (
+	reHyphenAndSymbol = regexp.MustCompile(`\-[\p{L}\-]`)
+	rePunctuation     = regexp.MustCompile(`[!\?\:;,\.—«»\(\)\[\]\<\>§…]`)
+	reLatinNum        = regexp.MustCompile(`^M{0,3}(CM|CD|D?C{0,3})?(XC|XL|L?X{0,3})?(IX|IV|V?I{0,3})?$`)
+)
 
 // InputConversion does any character substitution before checking
 //
@@ -190,18 +203,15 @@ func (s *GoSpell) Spell(word string) bool {
 	return false
 }
 
-// NewGoSpellReader создает speller из файлов Huspell,
-// переданных, как io.Reader
-// Если db передано не как nil, а isForced равен true, пересобирается таблица словоформ,
-// если isForced равен false, используется уже созданная таблица
-func NewGoSpellReader(aff, dic io.Reader, db *gorm.DB, isForced bool, lang string) (*GoSpell, error) {
+// NewGoSpellReader создает GoSpell из файлов Huspell, переданных, как io.Reader
+// Если db передано не как nil, собирается таблица словоформ,
+func NewGoSpellReader(aff, dic io.Reader, db *gorm.DB, lang string) (*GoSpell, error) {
 	affix, err := NewDictConfig(aff)
 	if err != nil {
 		return nil, err
 	}
 
 	gs := GoSpell{
-		// Dict:      make(map[string]struct{}, i*5),
 		compounds: make([]*regexp.Regexp, 0, len(affix.CompoundRule)),
 		splitter:  NewSplitter(affix.WordChars),
 	}
@@ -209,58 +219,54 @@ func NewGoSpellReader(aff, dic io.Reader, db *gorm.DB, isForced bool, lang strin
 	words := []string{}
 	wordForms := []WordForm{}
 
-	if db == nil || (db != nil && isForced) {
-		scanner := bufio.NewScanner(dic)
-		// get first line
-		if !scanner.Scan() {
-			return nil, scanner.Err()
-		}
+	scanner := bufio.NewScanner(dic)
+
+	if !scanner.Scan() {
+		return nil, scanner.Err()
+	}
+	line := scanner.Text()
+	i, err := strconv.ParseInt(line, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	if db != nil {
+		gs.Dict = make(map[string]struct{}, i*5)
+	}
+
+	for scanner.Scan() {
 		line := scanner.Text()
-		i, err := strconv.ParseInt(line, 10, 64)
+		words, err = affix.Expand(line, words)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Unable to process %q: %s", line, err)
 		}
 
-		if db != nil {
-			gs.Dict = make(map[string]struct{}, i*5)
+		if len(words) == 0 {
+			continue
 		}
 
-		for scanner.Scan() {
-			line := scanner.Text()
-			words, err = affix.Expand(line, words)
-			if err != nil {
-				return nil, fmt.Errorf("Unable to process %q: %s", line, err)
-			}
-
-			if len(words) == 0 {
-				continue
-			}
-
-			style := CaseStyle(words[0])
-			for _, word := range words {
-				if db != nil {
-					if isForced {
-						st := style
-						if st != Mixed && st != AllUpper && st != Title {
-							st = Mixed
-						}
-						wordForms = append(wordForms, WordForm{
-							Word: strings.ToLower(word),
-							Lang: lang,
-							Case: st,
-						})
-					}
-				} else {
-					for _, wordform := range CaseVariations(word, style) {
-						gs.Dict[wordform] = struct{}{}
-					}
+		style := CaseStyle(words[0])
+		for _, word := range words {
+			if db != nil {
+				st := style
+				if st != Mixed && st != AllUpper && st != Title {
+					st = Mixed
+				}
+				wordForms = append(wordForms, WordForm{
+					Word: strings.ToLower(word),
+					Lang: lang,
+					Case: st,
+				})
+			} else {
+				for _, wordform := range CaseVariations(word, style) {
+					gs.Dict[wordform] = struct{}{}
 				}
 			}
 		}
+	}
 
-		if err := scanner.Err(); err != nil {
-			return nil, err
-		}
+	if err := scanner.Err(); err != nil {
+		return nil, err
 	}
 
 	for _, compoundRule := range affix.CompoundRule {
@@ -270,7 +276,7 @@ func NewGoSpellReader(aff, dic io.Reader, db *gorm.DB, isForced bool, lang strin
 			case '(', ')', '+', '?', '*':
 				pattern = pattern + string(key)
 			default:
-				groups := affix.compoundMap[key]
+				groups := affix.CompoundMap[key]
 				pattern = pattern + "(" + strings.Join(groups, "|") + ")"
 			}
 		}
@@ -281,24 +287,35 @@ func NewGoSpellReader(aff, dic io.Reader, db *gorm.DB, isForced bool, lang strin
 		} else {
 			gs.compounds = append(gs.compounds, pat)
 		}
-
 	}
 
 	if len(affix.IconvReplacements) > 0 {
 		gs.ireplacer = strings.NewReplacer(affix.IconvReplacements...)
 	}
 
-	if db != nil && isForced {
+	if db != nil {
 		result := db.Create(&wordForms)
 		if result.Error != nil {
 			return nil, result.Error
 		}
+
+		if cfg, err := json.Marshal(gs.Dict); err == nil {
+			var configs []Preferences
+			configs = append(configs, Preferences{
+				Dict: string(cfg),
+			})
+			result = db.Create(&configs)
+			if result.Error != nil {
+				return nil, result.Error
+			}
+		}
+
 	}
 	gs.DB = db
 	return &gs, nil
 }
 
-// NewGoSpell from AFF and DIC Hunspell filenames
+// NewGoSpell создает новый GoSpell из файлов AFF, DIC Hunspell
 func NewGoSpell(affFile, dicFile string) (*GoSpell, error) {
 	aff, err := os.Open(affFile)
 	if err != nil {
@@ -310,13 +327,14 @@ func NewGoSpell(affFile, dicFile string) (*GoSpell, error) {
 		return nil, fmt.Errorf("Unable to open dic: %s", err)
 	}
 	defer dic.Close()
-	h, err := NewGoSpellReader(aff, dic, nil, false, "")
+	h, err := NewGoSpellReader(aff, dic, nil, "")
 	return h, err
 }
 
-// NewGoSpellDB from AFF, DIC Hunspell with put dictionary into database
-func NewGoSpellDB(affFile, dicFile, dbFile string, force bool) (*GoSpell, error) {
-	db := createTable(dbFile, force)
+// NewGoSpellDBForce создает из файлов AFF, DIC Hunspell
+// и складывает всё в базу данных, указанную в dbFile
+func NewGoSpellDBForce(affFile, dicFile, dbFile string) (*GoSpell, error) {
+	db := createTable(dbFile, true)
 
 	aff, err := os.Open(affFile)
 	if err != nil {
@@ -334,7 +352,7 @@ func NewGoSpellDB(affFile, dicFile, dbFile string, force bool) (*GoSpell, error)
 		lang = fileNameWithoutExtTrimSuffix(df.Name())
 	}
 
-	h, err := NewGoSpellReader(aff, dic, db, force, lang)
+	h, err := NewGoSpellReader(aff, dic, db, lang)
 	return h, err
 }
 
@@ -367,6 +385,59 @@ func createTable(dbFile string, force bool) *gorm.DB {
 		if err != nil {
 			return nil
 		}
+		err = db.Migrator().CreateTable(&Preferences{})
+		if err != nil {
+			return nil
+		}
 	}
 	return db
+}
+
+// NewGoSpellDB создает GoSpell с использованием указанной в пути базы данных
+func NewGoSpellDB(dbFile string) (*GoSpell, error) {
+	db := createTable(dbFile, false)
+	h, err := NewGoSpellDBReader(db)
+	return h, err
+}
+
+// NewGoSpellDBReader создает GoSpell с использованием указанной базы данных
+func NewGoSpellDBReader(db *gorm.DB) (*GoSpell, error) {
+	var prefs Preferences
+	db.First(&prefs)
+	if prefs.Dict == "" {
+		return nil, errors.New("Not found Dict in preferences")
+	}
+	var affix *DictConfig
+	json.Unmarshal([]byte(prefs.Dict), &affix)
+	gs := GoSpell{
+		compounds: make([]*regexp.Regexp, 0, len(affix.CompoundRule)),
+		splitter:  NewSplitter(affix.WordChars),
+	}
+
+	for _, compoundRule := range affix.CompoundRule {
+		pattern := "^"
+		for _, key := range compoundRule {
+			switch key {
+			case '(', ')', '+', '?', '*':
+				pattern = pattern + string(key)
+			default:
+				groups := affix.CompoundMap[key]
+				pattern = pattern + "(" + strings.Join(groups, "|") + ")"
+			}
+		}
+		pattern = pattern + "$"
+		pat, err := regexp.Compile(pattern)
+		if err != nil {
+			log.Printf("REGEXP FAIL= %q %s", pattern, err)
+		} else {
+			gs.compounds = append(gs.compounds, pat)
+		}
+	}
+
+	if len(affix.IconvReplacements) > 0 {
+		gs.ireplacer = strings.NewReplacer(affix.IconvReplacements...)
+	}
+
+	gs.DB = db
+	return &gs, nil
 }

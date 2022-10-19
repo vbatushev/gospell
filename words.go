@@ -61,6 +61,11 @@ func isLatinNumber(s string) bool {
 	return latinNumRegexp.MatchString(s)
 }
 
+func isInitial(s string) bool {
+	re := regexp.MustCompile(`^\p{Lu}\.$`)
+	return re.MatchString(s)
+}
+
 // is word in the form of a "number with units", e.g. "101ms", "3ft",
 // "5GB" if true, return the units, if not return empty string This is
 // highly English based and not sure how applicable it is to other

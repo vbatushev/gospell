@@ -59,18 +59,18 @@ type Rule struct {
 
 // DictConfig is a partial representation of a Hunspell AFF (Affix) file.
 type DictConfig struct {
-	Flag              string
-	TryChars          string
-	WordChars         string
-	NoSuggestFlag     rune
-	IconvReplacements []string
-	Replacements      [][2]string
-	AffixMap          map[rune]Affix
-	CamelCase         int
-	CompoundMin       int
-	CompoundOnly      string
-	CompoundRule      []string
-	compoundMap       map[rune][]string
+	Flag              string            `json:"flag,omitempty"`
+	TryChars          string            `json:"try_chars,omitempty"`
+	WordChars         string            `json:"word_chars,omitempty"`
+	NoSuggestFlag     rune              `json:"no_suggest_flag,omitempty"`
+	IconvReplacements []string          `json:"iconv_replacements,omitempty"`
+	Replacements      [][2]string       `json:"replacements,omitempty"`
+	AffixMap          map[rune]Affix    `json:"affix_map,omitempty"`
+	CamelCase         int               `json:"camel_case,omitempty"`
+	CompoundMin       int               `json:"compound_min,omitempty"`
+	CompoundOnly      string            `json:"compound_only,omitempty"`
+	CompoundRule      []string          `json:"compound_rule,omitempty"`
+	CompoundMap       map[rune][]string `json:"compound_map,omitempty"`
 }
 
 // Expand expands a word/affix using dictionary/affix rules
@@ -99,12 +99,12 @@ func (a DictConfig) Expand(wordAffix string, out []string) ([]string, error) {
 			compoundOnly = true
 			continue
 		}
-		if _, ok := a.compoundMap[key]; !ok {
+		if _, ok := a.CompoundMap[key]; !ok {
 			// the isn't a compound flag
 			continue
 		}
 		// is a compound flag
-		a.compoundMap[key] = append(a.compoundMap[key], word)
+		a.CompoundMap[key] = append(a.CompoundMap[key], word)
 	}
 
 	if compoundOnly {
@@ -120,7 +120,7 @@ func (a DictConfig) Expand(wordAffix string, out []string) ([]string, error) {
 		af, ok := a.AffixMap[key]
 		if !ok {
 			// is it compound flag?
-			if _, ok := a.compoundMap[key]; ok {
+			if _, ok := a.CompoundMap[key]; ok {
 				continue
 			}
 			// is it a NoSuggest?
@@ -174,7 +174,7 @@ func NewDictConfig(file io.Reader) (*DictConfig, error) {
 	aff := DictConfig{
 		Flag:        "ASCII",
 		AffixMap:    make(map[rune]Affix),
-		compoundMap: make(map[rune][]string),
+		CompoundMap: make(map[rune][]string),
 		CompoundMin: 3, // default in Hunspell
 	}
 	scanner := bufio.NewScanner(file)
@@ -238,8 +238,8 @@ func NewDictConfig(file io.Reader) (*DictConfig, error) {
 			} else {
 				aff.CompoundRule = append(aff.CompoundRule, parts[1])
 				for _, char := range parts[1] {
-					if _, ok := aff.compoundMap[char]; !ok {
-						aff.compoundMap[char] = []string{}
+					if _, ok := aff.CompoundMap[char]; !ok {
+						aff.CompoundMap[char] = []string{}
 					}
 				}
 			}

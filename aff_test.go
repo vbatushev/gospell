@@ -1,6 +1,7 @@
 package gospell
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 	"testing"
@@ -178,7 +179,7 @@ WORDCHARS 0123456789
 `
 	aff := strings.NewReader(sampleAff)
 	dic := strings.NewReader(sampleDic)
-	gs, err := NewGoSpellReader(aff, dic, nil, false, "")
+	gs, err := NewGoSpellReader(aff, dic, nil, "")
 	if err != nil {
 		t.Fatalf("Unable to create GoSpell: %s", err)
 	}
@@ -261,7 +262,7 @@ GB
 `
 	aff := strings.NewReader(sampleAff)
 	dic := strings.NewReader(sampleDic)
-	gs, err := NewGoSpellReader(aff, dic, nil, false, "")
+	gs, err := NewGoSpellReader(aff, dic, nil, "")
 	if err != nil {
 		t.Fatalf("Unable to create GoSpell: %s", err)
 	}
@@ -292,17 +293,38 @@ GB
 	}
 }
 
-func TestWorkWithDB(t *testing.T) {
+func TestWorkWithDBForce(t *testing.T) {
 	correctWord := "ЧК"
 	wrongWord := "Чк"
 
-	gs, err := NewGoSpellDB("./sample/ru_RU.aff", "./sample/ru_RU.dic", "./sample/dictionary.db", false)
+	gs, err := NewGoSpellDBForce("./sample/ru_RU.aff", "./sample/ru_RU.dic", "./sample/dictionary.db")
 	if err != nil {
 		t.Fail()
 	}
 
 	if gs.Spell(wrongWord) {
 		t.Fail()
+	}
+
+	if !gs.Spell(correctWord) {
+		t.Fail()
+	}
+}
+
+func TestWorkWithDB(t *testing.T) {
+	correctWord := "ракета"
+	wrongWord := "ра-хкета"
+
+	gs, err := NewGoSpellDB("./sample/dictionary.db")
+	if err != nil {
+		t.Fail()
+	}
+
+	if gs.Spell(wrongWord) {
+		t.Fail()
+	} else {
+		suggs := gs.GetSuggestions(wrongWord)
+		fmt.Println(suggs)
 	}
 
 	if !gs.Spell(correctWord) {
