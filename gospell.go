@@ -232,7 +232,7 @@ func NewGoSpellReader(aff, dic io.Reader, db *gorm.DB, lang string) (*GoSpell, e
 		return nil, err
 	}
 
-	if db != nil {
+	if db == nil {
 		gs.Dict = make(map[string]struct{}, i*5)
 	}
 
